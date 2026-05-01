@@ -1,5 +1,4 @@
 #include "../include/List.hpp"
-using namespace std;
 
 List::List() {
     this->start = nullptr;
@@ -7,6 +6,10 @@ List::List() {
 
 bool List::isEmpty() {
     return this->start == nullptr;
+}
+
+int List::getSize() {
+    return this->size;
 }
 
 void List::insertFirst(Cancion dato) {
@@ -43,6 +46,51 @@ Cancion List::getLast() {
         cursor = cursor->getNext();
     }
     return cursor->getDato();
+}
+
+Cancion List::get(int index) {
+    if (index < 0 || index >= this->size) {
+        return Cancion();
+    }
+    Node* cursor = this->start;
+    int posicion = 0;
+
+    while (posicion < index) {
+        cursor = cursor->getNext();
+        posicion++;
+    }
+    return cursor->getDato();
+}
+
+void List::removeFirst() {
+    if (this->start == nullptr) {
+        return;
+    }
+    Node* temp = this->start;
+    this->start = this->start->getNext();
+    delete temp;
+    this->size--;
+}
+
+void List::remove(int index) {
+    if (index < 0 || index >= this->size) {
+        return;
+    }
+    if (index == 0) {
+        removeFirst();
+        return;
+    }
+    Node* anterior = this->start;
+    int posicion = 0;
+
+    while (posicion < index - 1) {
+        anterior = anterior->getNext();
+        posicion++;
+    }
+    Node* temp = anterior->getNext();
+    anterior->setNext(temp->getNext());
+    delete temp;
+    this->size--;
 }
 
 void List::clear() {

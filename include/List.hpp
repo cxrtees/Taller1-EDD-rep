@@ -3,20 +3,27 @@
 #include "Cancion.hpp"
 
 class List {
-    private:
-        Node* start;
-    public:
-        List();
+private:
+    Node* start;
+    int size;
 
-        bool isEmpty();
+public:
+    List();
 
-        void insertFirst(Cancion dato);
-        void insertLast(Cancion dato);
+    bool isEmpty();
+    int getSize();
 
-        Cancion getFirst();
-        Cancion getLast();
+    void insertFirst(Cancion dato);
+    void insertLast(Cancion dato);
 
-        void clear();
+    Cancion getFirst();
+    Cancion getLast();
+    Cancion get(int index);
 
-        ~List();
+    void removeFirst();
+    void remove(int index);
+
+    void clear();
+
+    ~List();
 };

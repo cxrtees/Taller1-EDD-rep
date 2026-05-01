@@ -1,0 +1,58 @@
+#include "../include/List.hpp"
+using namespace std;
+
+List::List() {
+    this->start = nullptr;
+}
+
+bool List::isEmpty() {
+    return this->start == nullptr;
+}
+
+void List::insertFirst(Cancion dato) {
+    Node* nuevo = new Node(dato);
+    nuevo->setNext(this->start);
+    this->start = nuevo;
+}
+
+void List::insertLast(Cancion dato) {
+    if (this->start == nullptr){
+        this->start = new Node(dato);
+        return;
+    }
+    Node* cursor = this->start;
+    while (cursor->getNext() != nullptr) {
+        cursor = cursor->getNext();
+    }
+    cursor->setNext(new Node(dato));
+}
+
+Cancion List::getFirst() {
+    if (this->start == nullptr) {
+        return Cancion();
+    }
+    return this->start->getDato();
+}
+
+Cancion List::getLast() {
+    if (this->start == nullptr) {
+        return Cancion();
+    }
+    Node* cursor = this->start;
+    while (cursor->getNext() != nullptr) {
+        cursor = cursor->getNext();
+    }
+    return cursor->getDato();
+}
+
+void List::clear() {
+    while (this->start != nullptr) {
+        Node* temp = this->start->getNext();
+        delete this->start;
+        this->start = temp;
+    }
+}
+
+List::~List() {
+    clear();
+}

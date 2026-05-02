@@ -108,26 +108,40 @@ void Reproductor::siguiente() {
     this->estadoReproduccion = "reproduciendo";
 }
 
-void Reproductor::anterior() {
+void Reproductor::siguiente() {
+    if (this->cancionesRegistradas.isEmpty()) return;
+
     if (this->modoRepeticion == 1 && this->hayCancionActual) {
         this->estadoReproduccion = "reproduciendo";
         return;
     }
 
-    if (this->historial.isEmpty()) {
-        return;
+    if (this->listaReproduccionActual.isEmpty()) {
+        generarListaAleatoriaDesdeRegistro();
+
+        if (this->modoRepeticion == 2 && this->modoAleatorio) {
+            mezclarListaActual();
+        }
     }
-    if (this->hayCancionActual){
-        this->listaReproduccionActual.insertFirst(this->cancionActual);
+    if (this->listaReproduccionActual.isEmpty()) return;
+
+    if (this->hayCancionActual) {
+        this->historial.insertFirst(this->cancionActual);
     }
 
-    this->cancionActual = this->historial.popFirst(); 
+    this->cancionActual = this->listaReproduccionActual.popFirst();
     this->hayCancionActual = true;
     this->estadoReproduccion = "reproduciendo";
 }
 
 void Reproductor::cambiarModoAleatorio() {
+    bool antes = this->modoAleatorio;
     this->modoAleatorio = !this->modoAleatorio;
+
+    if (!antes && this->modoAleatorio) {
+        // Solo al activar
+        mezclarListaActual();
+    }
 }
 
 void Reproductor::cambiarModoRepeticion() {

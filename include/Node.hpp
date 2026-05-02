@@ -1,21 +1,19 @@
 #pragma once
 #include "Cancion.hpp"
-#include <string>
-using namespace std;
 
-class Node { 
+class Node {
 private:
     Cancion dato;
     Node* next;
+
 public:
-    Node(Cancion dato);
+    Node(const Cancion& dato);
 
-    Cancion getDato();
-    Node* getNext();
+    const Cancion& getDato() const;
+    Node* getNext() const;
 
-    void setDato(Cancion dato);
+    void setDato(const Cancion& dato);
     void setNext(Node* next);
 
     ~Node();
-
 };

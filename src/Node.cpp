@@ -1,24 +1,19 @@
-#include "../include/Node.hpp"
-using namespace std;
+#pragma once
+#include "Cancion.hpp"
 
-Node::Node(Cancion dato) {
-    this->dato = dato;
-    this->next = nullptr;
-}
+class Node {
+private:
+    Cancion dato;
+    Node* next;
 
-Cancion Node::getDato() {
-    return this->dato;
-}
-Node* Node::getNext() {
-    return this->next;
-}
-void Node::setDato(Cancion dato) {
-    this->dato = dato;
-}
-void Node::setNext(Node* next) {
-    this->next = next;
-}
+public:
+    Node(const Cancion& dato);
 
-Node::~Node() {
-}
+    const Cancion& getDato() const;
+    Node* getNext() const;
 
+    void setDato(const Cancion& dato);
+    void setNext(Node* next);
+
+    ~Node();
+};

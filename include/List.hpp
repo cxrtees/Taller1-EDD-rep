@@ -23,6 +23,10 @@ public:
     void removeFirst();
     void remove(int index);
 
+    Cancion popFirst();
+    Cancion popAt(int index);
+    void insertAt(int index, Cancion dato);
+
     void clear();
 
     ~List();

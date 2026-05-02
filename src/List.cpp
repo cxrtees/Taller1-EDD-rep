@@ -17,13 +17,13 @@ void List::insertFirst(Cancion dato) {
     Node* nuevo = new Node(dato);
     nuevo->setNext(this->start);
     this->start = nuevo;
-    this->size++; // IMPORTANTE
+    this->size++; 
 }
 
 void List::insertLast(Cancion dato) {
     if (this->start == nullptr) {
         this->start = new Node(dato);
-        this->size++; // IMPORTANTE
+        this->size++; 
         return;
     }
 
@@ -32,7 +32,7 @@ void List::insertLast(Cancion dato) {
         cursor = cursor->getNext();
     }
     cursor->setNext(new Node(dato));
-    this->size++; // IMPORTANTE
+    this->size++; 
 }
 
 Cancion List::getFirst() {
@@ -99,7 +99,67 @@ void List::remove(int index) {
     delete temp;
     this->size--;
 }
+Cancion List::popFirst() {
+    if (this->start == nullptr) {
+        return Cancion();
+    }
 
+    Node* temp = this->start;
+    Cancion dato = temp->getDato();
+
+    this->start = this->start->getNext();
+    delete temp;
+    this->size--;
+
+    return dato;
+}
+
+Cancion List::popAt(int index) {
+    if (index < 0 || index >= this->size) {
+        return Cancion();
+    }
+    if (index == 0) {
+        return popFirst();
+    }
+
+    Node* anterior = this->start;
+    for (int i = 0; i < index - 1; i++) {
+        anterior = anterior->getNext();
+    }
+
+    Node* temp = anterior->getNext();
+    Cancion dato = temp->getDato();
+
+    anterior->setNext(temp->getNext());
+    delete temp;
+    this->size--;
+
+    return dato;
+}
+
+void List::insertAt(int index, Cancion dato) {
+    if (index < 0 || index > this->size) return;
+
+    if (index == 0) {
+        insertFirst(dato);
+        return;
+    }
+    if (index == this->size) {
+        insertLast(dato);
+        return;
+    }
+
+    Node* nuevo = new Node(dato);
+
+    Node* anterior = this->start;
+    for (int i = 0; i < index - 1; i++) {
+        anterior = anterior->getNext();
+    }
+
+    nuevo->setNext(anterior->getNext());
+    anterior->setNext(nuevo);
+    this->size++;
+}
 void List::clear() {
     while (this->start != nullptr) {
         Node* temp = this->start->getNext();

@@ -2,6 +2,7 @@
 
 List::List() {
     this->start = nullptr;
+    this->size = 0; 
 }
 
 bool List::isEmpty() {
@@ -16,18 +17,22 @@ void List::insertFirst(Cancion dato) {
     Node* nuevo = new Node(dato);
     nuevo->setNext(this->start);
     this->start = nuevo;
+    this->size++; // IMPORTANTE
 }
 
 void List::insertLast(Cancion dato) {
-    if (this->start == nullptr){
+    if (this->start == nullptr) {
         this->start = new Node(dato);
+        this->size++; // IMPORTANTE
         return;
     }
+
     Node* cursor = this->start;
     while (cursor->getNext() != nullptr) {
         cursor = cursor->getNext();
     }
     cursor->setNext(new Node(dato));
+    this->size++; // IMPORTANTE
 }
 
 Cancion List::getFirst() {
@@ -80,6 +85,7 @@ void List::remove(int index) {
         removeFirst();
         return;
     }
+
     Node* anterior = this->start;
     int posicion = 0;
 
@@ -87,6 +93,7 @@ void List::remove(int index) {
         anterior = anterior->getNext();
         posicion++;
     }
+
     Node* temp = anterior->getNext();
     anterior->setNext(temp->getNext());
     delete temp;
@@ -99,6 +106,7 @@ void List::clear() {
         delete this->start;
         this->start = temp;
     }
+    this->size = 0; 
 }
 
 List::~List() {

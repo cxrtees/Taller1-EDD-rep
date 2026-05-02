@@ -46,4 +46,6 @@ public:
 
     void cambiarModoAleatorio();
     void cambiarModoRepeticion();
-};
+    void generarListaAleatoriaDesdeRegistro();
+    void mezclarListaActual();
+}

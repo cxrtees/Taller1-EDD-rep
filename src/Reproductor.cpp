@@ -109,6 +109,11 @@ void Reproductor::siguiente() {
 }
 
 void Reproductor::anterior() {
+    if (this->modoRepeticion == 1 && this->hayCancionActual) {
+        this->estadoReproduccion = "reproduciendo";
+        return;
+    }
+
     if (this->historial.isEmpty()) {
         return;
     }
@@ -116,8 +121,7 @@ void Reproductor::anterior() {
         this->listaReproduccionActual.insertFirst(this->cancionActual);
     }
 
-    this->cancionActual = this->historial.getFirst();
-    this->historial.removeFirst();
+    this->cancionActual = this->historial.popFirst(); 
     this->hayCancionActual = true;
     this->estadoReproduccion = "reproduciendo";
 }
@@ -131,5 +135,49 @@ void Reproductor::cambiarModoRepeticion() {
 
     if (this->modoRepeticion > 2) {
         this->modoRepeticion = 0;
+    }
+}
+void Reproductor::generarListaAleatoriaDesdeRegistro() {
+    this->listaReproduccionActual.clear();
+
+    int n = this->cancionesRegistradas.getSize();
+    if (n == 0) return;
+
+    // Copia temporal
+    List temp;
+    for (int i = 0; i < n; i++) {
+        temp.insertLast(this->cancionesRegistradas.get(i));
+    }
+
+    if (this->hayCancionActual) {
+        // eliminar una coincidencia por idInterno
+        for (int i = 0; i < temp.getSize(); i++) {
+            if (temp.get(i).getIdInterno() == this->cancionActual.getIdInterno()) {
+                temp.remove(i);
+                break;
+            }
+        }
+    }
+
+    while (!temp.isEmpty()) {
+        int len = temp.getSize();
+        int k = rand() % len; // 0..len-1
+        Cancion picked = temp.popAt(k);
+        this->listaReproduccionActual.insertLast(picked);
+    }
+}
+
+void Reproductor::mezclarListaActual() {
+    if (this->listaReproduccionActual.getSize() <= 1) return;
+
+    List temp;
+    while (!this->listaReproduccionActual.isEmpty()) {
+        temp.insertLast(this->listaReproduccionActual.popFirst());
+    }
+
+    while (!temp.isEmpty()) {
+        int len = temp.getSize();
+        int k = rand() % len;
+        this->listaReproduccionActual.insertLast(temp.popAt(k));
     }
 }

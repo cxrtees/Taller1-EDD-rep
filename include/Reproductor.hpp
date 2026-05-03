@@ -12,26 +12,37 @@ private:
     Cancion cancionActual;
     bool hayCancionActual;
 
-    std::string estadoReproduccion; // "reproduciendo", "en pausa", "detenido"
+    std::string estadoReproduccion; 
     bool modoAleatorio;
-    int modoRepeticion; // 0: off, 1: repetir una, 2: repetir todas
+    int modoRepeticion; 
+
+    void limpiarConsola();
+    void mostrarPantallaPrincipal();
+    void mostrarLineaActual();
+    std::string leerLinea();
+
+
+    void menuListaActual();  
+    void menuCanciones();   
 
 public:
     Reproductor();
+
+    
+    void run();
 
     bool tieneCancionActual();
     std::string getEstadoReproduccion();
     bool getModoAleatorio();
     int getModoRepeticion();
-
     Cancion getCancionActual();
 
     int getCantidadCancionesRegistradas();
     int getCantidadCancionesEnListaActual();
-
     Cancion getCancionRegistrada(int index);
     Cancion getCancionEnListaActual(int index);
 
+    
     void agregarCancionAlRegistro(Cancion cancion);
     void eliminarCancionDelRegistro(int index);
 
@@ -45,10 +56,11 @@ public:
     void cambiarModoAleatorio();
     void cambiarModoRepeticion();
 
+    
     void generarListaAleatoriaDesdeRegistro();
     void mezclarListaActual();
 
-      void setHayCancionActual(bool v);
+    void setHayCancionActual(bool v);
     void setEstadoReproduccion(const std::string& e);
     void setModoAleatorio(bool v);
     void setModoRepeticion(int r);
@@ -58,5 +70,4 @@ public:
     void appendListaActual(Cancion c);
 
     void clearRegistro();
-
 };

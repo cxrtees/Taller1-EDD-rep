@@ -157,14 +157,14 @@ void Reproductor::generarListaAleatoriaDesdeRegistro() {
     int n = this->cancionesRegistradas.getSize();
     if (n == 0) return;
 
-    // Copia temporal
+
     List temp;
     for (int i = 0; i < n; i++) {
         temp.insertLast(this->cancionesRegistradas.get(i));
     }
 
     if (this->hayCancionActual) {
-        // eliminar una coincidencia por idInterno
+    
         for (int i = 0; i < temp.getSize(); i++) {
             if (temp.get(i).getIdInterno() == this->cancionActual.getIdInterno()) {
                 temp.remove(i);
@@ -194,4 +194,37 @@ void Reproductor::mezclarListaActual() {
         int k = rand() % len;
         this->listaReproduccionActual.insertLast(temp.popAt(k));
     }
+}
+void Reproductor::setHayCancionActual(bool v) {
+    this->hayCancionActual = v;
+}
+
+void Reproductor::setEstadoReproduccion(const std::string& e) {
+    this->estadoReproduccion = e;
+}
+
+void Reproductor::setModoAleatorio(bool v) {
+    this->modoAleatorio = v;
+}
+
+void Reproductor::setModoRepeticion(int r) {
+    this->modoRepeticion = r;
+    if (this->modoRepeticion < 0) this->modoRepeticion = 0;
+    if (this->modoRepeticion > 2) this->modoRepeticion = 2;
+}
+
+void Reproductor::setCancionActual(Cancion c) {
+    this->cancionActual = c;
+}
+
+void Reproductor::clearListaActual() {
+    this->listaReproduccionActual.clear();
+}
+
+void Reproductor::appendListaActual(Cancion c) {
+    this->listaReproduccionActual.insertLast(c);
+}
+
+void Reproductor::clearRegistro() {
+    this->cancionesRegistradas.clear();
 }

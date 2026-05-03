@@ -1,9 +1,7 @@
-#pragma once 
+#pragma once
 #include "List.hpp"
 #include "Cancion.hpp"
 #include <string>
-
-using namespace std;
 
 class Reproductor {
 private:
@@ -14,15 +12,15 @@ private:
     Cancion cancionActual;
     bool hayCancionActual;
 
-    string estadoReproduccion; // reproduciendo pausado detenido
+    std::string estadoReproduccion; // "reproduciendo", "en pausa", "detenido"
     bool modoAleatorio;
-    int modoRepeticion; // 0: sin repetición, 1: repetir canción, 2: repetir listaidk
+    int modoRepeticion; // 0: off, 1: repetir una, 2: repetir todas
 
 public:
     Reproductor();
 
     bool tieneCancionActual();
-    string getEstadoReproduccion();
+    std::string getEstadoReproduccion();
     bool getModoAleatorio();
     int getModoRepeticion();
 
@@ -46,6 +44,19 @@ public:
 
     void cambiarModoAleatorio();
     void cambiarModoRepeticion();
+
     void generarListaAleatoriaDesdeRegistro();
     void mezclarListaActual();
-}
+
+      void setHayCancionActual(bool v);
+    void setEstadoReproduccion(const std::string& e);
+    void setModoAleatorio(bool v);
+    void setModoRepeticion(int r);
+    void setCancionActual(Cancion c);
+
+    void clearListaActual();
+    void appendListaActual(Cancion c);
+
+    void clearRegistro();
+
+};

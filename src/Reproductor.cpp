@@ -1,19 +1,18 @@
 #include "../include/Reproductor.hpp"
+#include "../include/FileManager.hpp"
 #include <iostream>
 #include <cstdlib>
-#include "../include/FileManager.hpp"
+#include <ctime>
 
 using namespace std;
-//mecanismo para limpiar para 1 decim mass
+
+// Limpia consola (1 decima extra)
 void Reproductor::limpiarConsola() {
 #ifdef _WIN32
     system("cls");
 #else
     system("clear");
 #endif
-}
-
-void Reproductor::run() {
 }
 
 string Reproductor::leerLinea() {
@@ -27,60 +26,64 @@ Reproductor::Reproductor() {
     this->estadoReproduccion = "detenido";
     this->modoAleatorio = false;
     this->modoRepeticion = 0;
+    srand((unsigned)time(nullptr));
 }
 
-bool Reproductor::tieneCancionActual() {
-    return this->hayCancionActual;
+// -------------------- GETTERS --------------------
+bool Reproductor::tieneCancionActual() { return this->hayCancionActual; }
+string Reproductor::getEstadoReproduccion() { return this->estadoReproduccion; }
+bool Reproductor::getModoAleatorio() { return this->modoAleatorio; }
+int Reproductor::getModoRepeticion() { return this->modoRepeticion; }
+Cancion Reproductor::getCancionActual() { return this->cancionActual; }
+
+int Reproductor::getCantidadCancionesRegistradas() { return this->cancionesRegistradas.getSize(); }
+int Reproductor::getCantidadCancionesEnListaActual() { return this->listaReproduccionActual.getSize(); }
+Cancion Reproductor::getCancionRegistrada(int index) { return this->cancionesRegistradas.get(index); }
+Cancion Reproductor::getCancionEnListaActual(int index) { return this->listaReproduccionActual.get(index); }
+
+// -------------------- SETTERS (para FileManager) --------------------
+void Reproductor::setHayCancionActual(bool v) { this->hayCancionActual = v; }
+void Reproductor::setEstadoReproduccion(const std::string& e) { this->estadoReproduccion = e; }
+void Reproductor::setModoAleatorio(bool v) { this->modoAleatorio = v; }
+void Reproductor::setModoRepeticion(int r) {
+    this->modoRepeticion = r;
+    if (this->modoRepeticion < 0) this->modoRepeticion = 0;
+    if (this->modoRepeticion > 2) this->modoRepeticion = 2;
+}
+void Reproductor::setCancionActual(Cancion c) { this->cancionActual = c; }
+
+void Reproductor::clearListaActual() { this->listaReproduccionActual.clear(); }
+void Reproductor::appendListaActual(Cancion c) { this->listaReproduccionActual.insertLast(c); }
+void Reproductor::clearRegistro() { this->cancionesRegistradas.clear(); }
+
+// -------------------- Helpers RA (repetir todas, mismo orden) --------------------
+void Reproductor::actualizarCicloBaseDesdeListaActual() {
+    this->cicloBase.clear();
+    for (int i = 0; i < this->listaReproduccionActual.getSize(); i++) {
+        this->cicloBase.insertLast(this->listaReproduccionActual.get(i));
+    }
 }
 
-string Reproductor::getEstadoReproduccion() {
-    return this->estadoReproduccion;
+void Reproductor::recargarListaActualDesdeCicloBase() {
+    this->listaReproduccionActual.clear();
+    for (int i = 0; i < this->cicloBase.getSize(); i++) {
+        this->listaReproduccionActual.insertLast(this->cicloBase.get(i));
+    }
 }
 
-bool Reproductor::getModoAleatorio() {
-    return this->modoAleatorio;
-}
-
-int Reproductor::getModoRepeticion() {
-    return this->modoRepeticion;
-}
-
-Cancion Reproductor::getCancionActual() {
-    return this->cancionActual;
-}
-
-int Reproductor::getCantidadCancionesRegistradas() {
-    return this->cancionesRegistradas.getSize();
-}
-
-int Reproductor::getCantidadCancionesEnListaActual() {
-    return this->listaReproduccionActual.getSize();
-}
-
-Cancion Reproductor::getCancionRegistrada(int index) {
-    return this->cancionesRegistradas.get(index);
-}
-
-Cancion Reproductor::getCancionEnListaActual(int index) {
-    return this->listaReproduccionActual.get(index);
-}
-
+// -------------------- Registro / playlist --------------------
 void Reproductor::agregarCancionAlRegistro(Cancion cancion) {
     this->cancionesRegistradas.insertLast(cancion);
 }
 
 void Reproductor::eliminarCancionDelRegistro(int index) {
-    if (index < 0 || index >= this->cancionesRegistradas.getSize()) {
-        return;
-    }
-
+    if (index < 0 || index >= this->cancionesRegistradas.getSize()) return;
     this->cancionesRegistradas.remove(index);
 }
 
 void Reproductor::reproducirCancionDelRegristro(int index) {
-    if (index < 0 || index >= this->cancionesRegistradas.getSize()) {
-        return;
-    }
+    if (index < 0 || index >= this->cancionesRegistradas.getSize()) return;
+
     if (this->hayCancionActual) {
         this->historial.insertFirst(this->cancionActual);
     }
@@ -90,15 +93,40 @@ void Reproductor::reproducirCancionDelRegristro(int index) {
 }
 
 void Reproductor::agregarCancionAListaActual(int index) {
-    if (index < 0 || index >= this->cancionesRegistradas.getSize()) {
+    if (index < 0 || index >= this->cancionesRegistradas.getSize()) return;
+    this->listaReproduccionActual.insertLast(this->cancionesRegistradas.get(index));
+
+    // si estamos en RA, el "mismo orden anterior" debe incluir esta nueva canción agregada al final
+    // (si quieres que no afecte al ciclo, borra la linea de abajo)
+    actualizarCicloBaseDesdeListaActual();
+}
+
+void Reproductor::togglePlayPause() {
+    if (this->cancionesRegistradas.isEmpty()) return;
+
+    // Si no hay canción actual, iniciar reproducción desde la lista (o generarla)
+    if (!this->hayCancionActual) {
+        if (this->listaReproduccionActual.isEmpty()) {
+            generarListaAleatoriaDesdeRegistro();
+        }
+
+        if (!this->listaReproduccionActual.isEmpty()) {
+            this->cancionActual = this->listaReproduccionActual.popFirst();
+            this->hayCancionActual = true;
+            this->estadoReproduccion = "reproduciendo";
+        }
         return;
     }
-    this->listaReproduccionActual.insertLast(this->cancionesRegistradas.get(index));
+
+    if (this->estadoReproduccion == "reproduciendo") this->estadoReproduccion = "en pausa";
+    else if (this->estadoReproduccion == "en pausa") this->estadoReproduccion = "reproduciendo";
+    else this->estadoReproduccion = "reproduciendo";
 }
 
 void Reproductor::anterior() {
     if (this->cancionesRegistradas.isEmpty()) return;
 
+    // R1: no cambia pista
     if (this->modoRepeticion == 1 && this->hayCancionActual) {
         this->estadoReproduccion = "reproduciendo";
         return;
@@ -118,24 +146,52 @@ void Reproductor::anterior() {
 void Reproductor::siguiente() {
     if (this->cancionesRegistradas.isEmpty()) return;
 
+    // R1: no cambia pista
     if (this->modoRepeticion == 1 && this->hayCancionActual) {
         this->estadoReproduccion = "reproduciendo";
         return;
     }
 
-    if (this->listaReproduccionActual.isEmpty()) {
-        generarListaAleatoriaDesdeRegistro();
+    // Si no hay actual, arrancar desde pendientes
+    if (!this->hayCancionActual) {
+        if (this->listaReproduccionActual.isEmpty()) {
+            generarListaAleatoriaDesdeRegistro();
+        }
 
-        if (this->modoRepeticion == 2 && this->modoAleatorio) {
-            mezclarListaActual();
+        if (this->listaReproduccionActual.isEmpty() && this->modoRepeticion == 2 && !this->cicloBase.isEmpty()) {
+            recargarListaActualDesdeCicloBase();
+            if (this->modoAleatorio) mezclarListaActual();
+        }
+
+        if (this->listaReproduccionActual.isEmpty()) return;
+
+        this->cancionActual = this->listaReproduccionActual.popFirst();
+        this->hayCancionActual = true;
+        this->estadoReproduccion = "reproduciendo";
+        return;
+    }
+
+    // Si no quedan pendientes
+    if (this->listaReproduccionActual.isEmpty()) {
+        if (this->modoRepeticion == 2) {
+            // RA: mismo orden anterior
+            if (!this->cicloBase.isEmpty()) {
+                recargarListaActualDesdeCicloBase();
+                // si shuffle está activo, remezclar al iniciar ciclo nuevo
+                if (this->modoAleatorio) mezclarListaActual();
+            } else {
+                // fallback
+                generarListaAleatoriaDesdeRegistro();
+            }
+        } else {
+            // sin RA: genera nueva lista aleatoria
+            generarListaAleatoriaDesdeRegistro();
         }
     }
+
     if (this->listaReproduccionActual.isEmpty()) return;
 
-    if (this->hayCancionActual) {
-        this->historial.insertFirst(this->cancionActual);
-    }
-
+    this->historial.insertFirst(this->cancionActual);
     this->cancionActual = this->listaReproduccionActual.popFirst();
     this->hayCancionActual = true;
     this->estadoReproduccion = "reproduciendo";
@@ -147,6 +203,7 @@ void Reproductor::cambiarModoAleatorio() {
     bool antes = this->modoAleatorio;
     this->modoAleatorio = !this->modoAleatorio;
 
+    // Mezcla solo al activar
     if (!antes && this->modoAleatorio) {
         mezclarListaActual();
     }
@@ -154,25 +211,23 @@ void Reproductor::cambiarModoAleatorio() {
 
 void Reproductor::cambiarModoRepeticion() {
     this->modoRepeticion++;
-
-    if (this->modoRepeticion > 2) {
-        this->modoRepeticion = 0;
-    }
+    if (this->modoRepeticion > 2) this->modoRepeticion = 0;
 }
+
+// Construye lista aleatoria y fija cicloBase (para RA opción 2)
 void Reproductor::generarListaAleatoriaDesdeRegistro() {
     this->listaReproduccionActual.clear();
 
     int n = this->cancionesRegistradas.getSize();
     if (n == 0) return;
 
-
     List temp;
     for (int i = 0; i < n; i++) {
         temp.insertLast(this->cancionesRegistradas.get(i));
     }
 
+    // opcional: evitar duplicar la actual en pendientes
     if (this->hayCancionActual) {
-    
         for (int i = 0; i < temp.getSize(); i++) {
             if (temp.get(i).getIdInterno() == this->cancionActual.getIdInterno()) {
                 temp.remove(i);
@@ -183,12 +238,16 @@ void Reproductor::generarListaAleatoriaDesdeRegistro() {
 
     while (!temp.isEmpty()) {
         int len = temp.getSize();
-        int k = rand() % len; 
+        int k = rand() % len;          // 0..len-1
         Cancion picked = temp.popAt(k);
         this->listaReproduccionActual.insertLast(picked);
     }
+
+    // Guardamos el orden base del ciclo (para repetir todas)
+    actualizarCicloBaseDesdeListaActual();
 }
 
+// Mezcla solo pendientes actuales (NO toca cicloBase)
 void Reproductor::mezclarListaActual() {
     if (this->listaReproduccionActual.getSize() <= 1) return;
 
@@ -203,39 +262,8 @@ void Reproductor::mezclarListaActual() {
         this->listaReproduccionActual.insertLast(temp.popAt(k));
     }
 }
-void Reproductor::setHayCancionActual(bool v) {
-    this->hayCancionActual = v;
-}
 
-void Reproductor::setEstadoReproduccion(const std::string& e) {
-    this->estadoReproduccion = e;
-}
-
-void Reproductor::setModoAleatorio(bool v) {
-    this->modoAleatorio = v;
-}
-
-void Reproductor::setModoRepeticion(int r) {
-    this->modoRepeticion = r;
-    if (this->modoRepeticion < 0) this->modoRepeticion = 0;
-    if (this->modoRepeticion > 2) this->modoRepeticion = 2;
-}
-
-void Reproductor::setCancionActual(Cancion c) {
-    this->cancionActual = c;
-}
-
-void Reproductor::clearListaActual() {
-    this->listaReproduccionActual.clear();
-}
-
-void Reproductor::appendListaActual(Cancion c) {
-    this->listaReproduccionActual.insertLast(c);
-}
-
-void Reproductor::clearRegistro() {
-    this->cancionesRegistradas.clear();
-}
+// -------------------- UI / Menús --------------------
 void Reproductor::mostrarLineaActual() {
     if (!this->hayCancionActual) {
         cout << "Reproduccion Detenida\n";
@@ -261,7 +289,7 @@ void Reproductor::mostrarLineaActual() {
         cout << state << ": " << this->cancionActual.getNombreCancion() << "\n";
 
     cout << "Artista: " << this->cancionActual.getNombreArtista() << "\n";
-    cout << "Album: " << this->cancionActual.getNombreAlbum() << " [" << this->cancionActual.getAnio() << "]"<< endl;
+    cout << "Album: " << this->cancionActual.getNombreAlbum() << " [" << this->cancionActual.getAnio() << "]";
 }
 
 void Reproductor::mostrarPantallaPrincipal() {
@@ -277,39 +305,13 @@ void Reproductor::mostrarPantallaPrincipal() {
     cout << "X - Salir\n";
     cout << "Ingrese Opcion: ";
 }
-void Reproductor::togglePlayPause() {
-    if (this->cancionesRegistradas.isEmpty()) return;
 
-    if (!this->hayCancionActual) {
-    
-        if (this->listaReproduccionActual.isEmpty()) {
-            generarListaAleatoriaDesdeRegistro();
-        }
-        if (!this->listaReproduccionActual.isEmpty()) {
-            this->cancionActual = this->listaReproduccionActual.popFirst();
-            this->hayCancionActual = true;
-            this->estadoReproduccion = "reproduciendo";
-        }
-        return;
-    }
-
-    if (this->estadoReproduccion == "reproduciendo") {
-        this->estadoReproduccion = "en pausa";
-    } else if (this->estadoReproduccion == "en pausa") {
-        this->estadoReproduccion = "reproduciendo";
-    } else {
-        
-        this->estadoReproduccion = "reproduciendo";
-    }
-
-}
 void Reproductor::menuListaActual() {
     if (this->cancionesRegistradas.isEmpty()) return;
 
     while (true) {
         limpiarConsola();
 
-        
         if (this->hayCancionActual) {
             cout << "Actual: " << this->cancionActual.getNombreCancion()
                  << " - " << this->cancionActual.getNombreArtista() << "\n";
@@ -329,7 +331,6 @@ void Reproductor::menuListaActual() {
             continue;
         }
 
-        // Mostrar pendientes (1..n)
         for (int i = 0; i < this->listaReproduccionActual.getSize(); i++) {
             Cancion c = this->listaReproduccionActual.get(i);
             cout << (i + 1) << ". " << c.getNombreCancion() << " - " << c.getNombreArtista() << "\n";
@@ -346,7 +347,6 @@ void Reproductor::menuListaActual() {
         if (op[0] == 'V' || op[0] == 'v') return;
 
         if (op[0] == 'S' || op[0] == 's') {
-            
             int pos = 0;
             for (size_t i = 1; i < op.size(); i++) {
                 if (op[i] < '0' || op[i] > '9') { pos = 0; break; }
@@ -354,22 +354,217 @@ void Reproductor::menuListaActual() {
             }
             if (pos <= 0 || pos > this->listaReproduccionActual.getSize()) continue;
 
-        
             if (this->hayCancionActual) {
                 this->historial.insertFirst(this->cancionActual);
             }
 
-        
+            // descartar 1..pos-1
             for (int i = 1; i < pos; i++) {
                 this->listaReproduccionActual.popFirst();
             }
 
-    
+            // pos pasa a ser actual
             this->cancionActual = this->listaReproduccionActual.popFirst();
             this->hayCancionActual = true;
             this->estadoReproduccion = "reproduciendo";
 
-            return; 
+            return; // vuelve al menú principal
+        }
+    }
+}
+
+void Reproductor::menuCanciones() {
+    while (true) {
+        limpiarConsola();
+
+        if (this->hayCancionActual) {
+            cout << "Actual: " << this->cancionActual.getNombreCancion()
+                 << " - " << this->cancionActual.getNombreArtista() << "\n";
+        } else {
+            cout << "Actual: (sin pista)\n";
+        }
+
+        cout << "Canciones registradas:\n";
+        if (this->cancionesRegistradas.isEmpty()) {
+            cout << "Vacio\n";
+        } else {
+            for (int i = 0; i < this->cancionesRegistradas.getSize(); i++) {
+                Cancion c = this->cancionesRegistradas.get(i);
+                cout << (i + 1) << ". " << c.getNombreCancion() << " - " << c.getNombreArtista() << "\n";
+            }
+        }
+
+        cout << "Opciones:\n";
+        cout << "R<num> - Reproducir cancion seleccionada\n";
+        cout << "A<num> - Agregar cancion seleccionada al final de la lista actual\n";
+        cout << "N - Agregar cancion al registro\n";
+        cout << "D<num> - Eliminar cancion seleccionada\n";
+        cout << "V - Volver al menu principal\n";
+        cout << "Ingrese Opcion: ";
+
+        string op = leerLinea();
+        if (op.empty()) continue;
+
+        if (op[0] == 'V' || op[0] == 'v') return;
+
+        // N: Agregar nueva canción
+        if (op[0] == 'N' || op[0] == 'n') {
+            int newId = 1;
+            for (int i = 0; i < this->cancionesRegistradas.getSize(); i++) {
+                int id = this->cancionesRegistradas.get(i).getIdInterno();
+                if (id >= newId) newId = id + 1;
+            }
+
+            string nombre, artista, album, ubic;
+            int anio = 0, dur = 0;
+
+            cout << "Nombre cancion: ";
+            nombre = leerLinea();
+            cout << "Nombre artista: ";
+            artista = leerLinea();
+            cout << "Nombre album: ";
+            album = leerLinea();
+            cout << "Anio: ";
+            anio = atoi(leerLinea().c_str());
+            cout << "Duracion (segundos): ";
+            dur = atoi(leerLinea().c_str());
+            cout << "Ubicacion archivo: ";
+            ubic = leerLinea();
+
+            Cancion c(newId, nombre, artista, album, anio, dur, ubic);
+            agregarCancionAlRegistro(c);
+
+            FileManager::guardarCanciones("music_source.txt", *this);
+            return;
+        }
+
+        // Parse comando + número (R<num>, A<num>, D<num>)
+        char cmd = op[0];
+        int num = 0;
+        for (size_t i = 1; i < op.size(); i++) {
+            if (op[i] < '0' || op[i] > '9') { num = 0; break; }
+            num = num * 10 + (op[i] - '0');
+        }
+        if (num <= 0) continue;
+
+        int index = num - 1;
+        if (index < 0 || index >= this->cancionesRegistradas.getSize()) continue;
+
+        if (cmd == 'R' || cmd == 'r') {
+            reproducirCancionDelRegristro(index);
+
+            // vaciar y armar una nueva lista aleatoria (ciclo nuevo)
+            this->listaReproduccionActual.clear();
+            generarListaAleatoriaDesdeRegistro();
+
+            this->estadoReproduccion = "reproduciendo";
+            return;
+        }
+
+        if (cmd == 'A' || cmd == 'a') {
+            agregarCancionAListaActual(index);
+            return;
+        }
+
+        if (cmd == 'D' || cmd == 'd') {
+            Cancion toDel = this->cancionesRegistradas.get(index);
+            int idDel = toDel.getIdInterno();
+
+            eliminarCancionDelRegistro(index);
+
+            // reconstruir lista actual sin idDel
+            List nuevaActual;
+            for (int i = 0; i < this->listaReproduccionActual.getSize(); i++) {
+                Cancion c = this->listaReproduccionActual.get(i);
+                if (c.getIdInterno() != idDel) nuevaActual.insertLast(c);
+            }
+            this->listaReproduccionActual.clear();
+            for (int i = 0; i < nuevaActual.getSize(); i++) this->listaReproduccionActual.insertLast(nuevaActual.get(i));
+
+            // reconstruir historial sin idDel
+            List nuevoHist;
+            for (int i = 0; i < this->historial.getSize(); i++) {
+                Cancion c = this->historial.get(i);
+                if (c.getIdInterno() != idDel) nuevoHist.insertLast(c);
+            }
+            this->historial.clear();
+            for (int i = 0; i < nuevoHist.getSize(); i++) this->historial.insertLast(nuevoHist.get(i));
+
+            // reconstruir cicloBase sin idDel (para RA)
+            List nuevoCiclo;
+            for (int i = 0; i < this->cicloBase.getSize(); i++) {
+                Cancion c = this->cicloBase.get(i);
+                if (c.getIdInterno() != idDel) nuevoCiclo.insertLast(c);
+            }
+            this->cicloBase.clear();
+            for (int i = 0; i < nuevoCiclo.getSize(); i++) this->cicloBase.insertLast(nuevoCiclo.get(i));
+
+            if (this->hayCancionActual && this->cancionActual.getIdInterno() == idDel) {
+                this->hayCancionActual = false;
+                this->estadoReproduccion = "detenido";
+            }
+
+            FileManager::guardarCanciones("music_source.txt", *this);
+            return;
+        }
+    }
+}
+
+
+void Reproductor::run() {
+    // Cargar canciones
+    FileManager::cargarCanciones("music_source.txt", *this);
+
+    // Cargar status
+    if (FileManager::existeArchivo("status.cfg")) {
+        FileManager::cargarStatus("status.cfg", *this);
+    } else {
+        FileManager::guardarStatus("status.cfg", *this);
+    }
+
+    // coherencia si no hay canciones
+    if (this->cancionesRegistradas.isEmpty()) {
+        this->hayCancionActual = false;
+        this->estadoReproduccion = "detenido";
+        this->listaReproduccionActual.clear();
+        this->historial.clear();
+        this->cicloBase.clear();
+        FileManager::guardarStatus("status.cfg", *this);
+    }
+
+    while (true) {
+        limpiarConsola();
+        mostrarPantallaPrincipal();
+        string op = leerLinea();
+        if (op.empty()) continue;
+
+        char c = op[0];
+        if (c >= 'a' && c <= 'z') c = char(c - 'a' + 'A');
+
+        if (c == 'W') {
+            togglePlayPause();
+            FileManager::guardarStatus("status.cfg", *this);
+        } else if (c == 'Q') {
+            anterior();
+            FileManager::guardarStatus("status.cfg", *this);
+        } else if (c == 'E') {
+            siguiente();
+            FileManager::guardarStatus("status.cfg", *this);
+        } else if (c == 'S') {
+            cambiarModoAleatorio();
+            FileManager::guardarStatus("status.cfg", *this);
+        } else if (c == 'R') {
+            cambiarModoRepeticion();
+            FileManager::guardarStatus("status.cfg", *this);
+        } else if (c == 'A') {
+            menuListaActual();
+            FileManager::guardarStatus("status.cfg", *this);
+        } else if (c == 'L') {
+            menuCanciones();
+            FileManager::guardarStatus("status.cfg", *this);
+        } else if (c == 'X') {
+            FileManager::guardarStatus("status.cfg", *this);
+            return;
         }
     }
 }

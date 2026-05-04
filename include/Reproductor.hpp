@@ -8,6 +8,7 @@ private:
     List cancionesRegistradas;
     List listaReproduccionActual;
     List historial;
+    List cicloBase;
 
     Cancion cancionActual;
     bool hayCancionActual;
@@ -24,6 +25,10 @@ private:
 
     void menuListaActual();  
     void menuCanciones();   
+
+    
+    void actualizarCicloBaseDesdeListaActual();
+    void recargarListaActualDesdeCicloBase();
 
 public:
     Reproductor();

@@ -3,7 +3,7 @@
 ## Descripción
 Este proyecto corresponde al **Taller 1** de la asignatura **Estructuras de Datos**.
 
-La aplicación consiste en un **reproductor de música por consola**, desarrollado en **C++**, que trabaja con estructuras de datos implementadas manualmente con **listas enlazadas, nodos y punteros**, sin utilizar contenedores STL. El sistema carga canciones registradas desde un archivo `music_source.txt` y maneja el estado del reproductor mediante `status.cfg`. :contentReference[oaicite:1]{index=1}
+La aplicación consiste en un **reproductor de música por consola**, desarrollado en **C++**, que trabaja con estructuras de datos implementadas manualmente con **listas enlazadas, nodos y punteros**, sin utilizar contenedores STL. El sistema carga canciones registradas desde un archivo `music_source.txt` y maneja el estado del reproductor mediante `status.cfg`. 
 
 ## Integrantes
 - Benjamín Ismael Cortés Acuña
@@ -37,3 +37,33 @@ Taller1-EDD-rep
     ├── List.cpp
     ├── Reproductor.cpp
     └── FileManager.cpp
+```
+### Compilar
+Desde la raíz del proyecto, ejecutar:
+
+```bash
+mingw32-make
+```
+Esto generará el ejecutable: 
+```bash
+reproductor.exe
+```
+### Ejecutar 
+Para ejecutar el programa: 
+```bash
+mingw32-make run
+```
+También se puede ejecutar directamente con:
+```bash
+.\reproductor.exe
+```
+### Limpiar archivos generados 
+Para eliminar el ejecutable:
+```bash
+mingw32-make clean
+```
+```md
+### Archivos utilizados por el programa
+- `music_source.txt`: registro de canciones disponibles.
+- `status.cfg`: archivo de estado del reproductor.
+```

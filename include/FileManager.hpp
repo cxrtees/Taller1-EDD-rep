@@ -13,7 +13,6 @@ public:
     static bool cargarStatus(const std::string& nombreArchivo, Reproductor& reproductor);
     static bool guardarStatus(const std::string& nombreArchivo, Reproductor& reproductor);
 
-private:
     // helpers
     static std::string trim(const std::string& s);
     static char detectarDelimitador(const std::string& line);

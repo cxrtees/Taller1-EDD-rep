@@ -13,6 +13,9 @@ void Reproductor::limpiarConsola() {
 #endif
 }
 
+void Reproductor::run() {
+}
+
 string Reproductor::leerLinea() {
     string s;
     getline(cin, s);
@@ -258,8 +261,7 @@ void Reproductor::mostrarLineaActual() {
         cout << state << ": " << this->cancionActual.getNombreCancion() << "\n";
 
     cout << "Artista: " << this->cancionActual.getNombreArtista() << "\n";
-    cout << "Album: " << this->cancionActual.getNombreAlbum() << " [" << this->cancionActual.getAnio() << "]
-";
+    cout << "Album: " << this->cancionActual.getNombreAlbum() << " [" << this->cancionActual.getAnio() << "]"<< endl;
 }
 
 void Reproductor::mostrarPantallaPrincipal() {

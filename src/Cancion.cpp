@@ -21,25 +21,25 @@ Cancion::Cancion(int idInterno, string nombreCancion, string nombreArtista, stri
     this->ubicacionArchivo = ubicacionArchivo;
 }
 
-int Cancion::getIdInterno() {
+int Cancion::getIdInterno() const {
     return this->idInterno;
 }
-string Cancion::getNombreCancion() {
+string Cancion::getNombreCancion() const {
     return this->nombreCancion;
 }
-string Cancion::getNombreArtista() {
+string Cancion::getNombreArtista() const {
     return this->nombreArtista;
 }
-string Cancion::getNombreAlbum() {
+string Cancion::getNombreAlbum() const {
     return this->nombreAlbum;
 }
-int Cancion::getAnio() {
+int Cancion::getAnio() const {
     return this->anio;
 }
-int Cancion::getDuracionSegundos() {
+int Cancion::getDuracionSegundos() const {
     return this->duracionSegundos;
 }
-string Cancion::getUbicacionArchivo() {
+string Cancion::getUbicacionArchivo() const {
     return this->ubicacionArchivo;
 }
 
@@ -55,7 +55,7 @@ void Cancion::setNombreArtista(string nombreArtista) {
 void Cancion::setNombreAlbum(string nombreAlbum) {
     this->nombreAlbum = nombreAlbum;
 }
-void Cancion::setAAnio(int anio) {
+void Cancion::setAnio(int anio) {
     this->anio = anio;
 }
 void Cancion::setDuracionSegundos(int duracionSegundos) {

@@ -1,19 +1,25 @@
-#pragma once
-#include "Cancion.hpp"
+#include "../include/Node.hpp"
 
-class Node {
-private:
-    Cancion dato;
-    Node* next;
+Node::Node(const Cancion& dato) {
+    this->dato = dato;
+    this->next = nullptr;
+}
 
-public:
-    Node(const Cancion& dato);
+const Cancion& Node::getDato() const {
+    return this->dato;
+}
 
-    const Cancion& getDato() const;
-    Node* getNext() const;
+Node* Node::getNext() const {
+    return this->next;
+}
 
-    void setDato(const Cancion& dato);
-    void setNext(Node* next);
+void Node::setDato(const Cancion& dato) {
+    this->dato = dato;
+}
 
-    ~Node();
-};
+void Node::setNext(Node* next) {
+    this->next = next;
+}
+
+Node::~Node() {
+}

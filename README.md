@@ -72,8 +72,8 @@ Para eliminar el ejecutable:
 ```bash
 mingw32-make clean
 ```
-```md
 ### Archivos utilizados por el programa
+```md
 - `music_source.txt`: registro de canciones disponibles.
 - `status.cfg`: archivo de estado del reproductor.
 ```

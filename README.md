@@ -18,6 +18,7 @@ Para compilar y ejecutar este proyecto se requiere:
 ## Estructura del proyecto
 ```text
 Taller1-EDD-rep
+│   diagrama_de_clases 
 │   README.md
 │   Makefile
 │   music_source.txt
@@ -57,13 +58,28 @@ También se puede ejecutar directamente con:
 ```bash
 .\reproductor.exe
 ```
+### Compilación manual alternativa
+Si mingw32-make no está disponible en el sistema, se puede compilar manualmente con:
+```bash
+g++ -std=c++17 -Wall -Wextra -Iinclude src/main.cpp src/Cancion.cpp src/Node.cpp src/List.cpp src/Reproductor.cpp src/FileManager.cpp -o reproductor.exe
+```
+Luego ejecutar con: 
+```bash
+.\reproductor.exe
+```
 ### Limpiar archivos generados 
 Para eliminar el ejecutable:
 ```bash
 mingw32-make clean
 ```
-```md
 ### Archivos utilizados por el programa
+```md
 - `music_source.txt`: registro de canciones disponibles.
 - `status.cfg`: archivo de estado del reproductor.
 ```
+
+## Diagrama de clases
+
+Haz clic aquí para abrir el PDF del diagrama:
+
+[📄 Ver diagrama de clases](diagrama_de_clases/DiagramaClases_Taller1EDD.drawio.pdf)

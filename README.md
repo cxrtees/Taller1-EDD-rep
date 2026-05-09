@@ -67,3 +67,9 @@ mingw32-make clean
 - `music_source.txt`: registro de canciones disponibles.
 - `status.cfg`: archivo de estado del reproductor.
 ```
+
+## Diagrama de clases
+
+Haz clic aquí para abrir el PDF del diagrama:
+
+[📄 Ver diagrama de clases](diagrama_de_clases/DiagramaClases_Taller1EDD.drawio.pdf)

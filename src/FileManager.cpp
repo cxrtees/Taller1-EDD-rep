@@ -43,7 +43,6 @@ bool FileManager::toBoolSafe(const std::string& s, bool def) {
     return def;
 }
 
-// Delimitadores permitidos: , . : ; -
 char FileManager::detectarDelimitador(const std::string& line) {
     const char delims[5] = {',', '.', ':', ';', '-'};
     int bestCount = -1;
@@ -57,7 +56,6 @@ char FileManager::detectarDelimitador(const std::string& line) {
     return best;
 }
 
-// Escapamos \, |, = y saltos, para meter strings en una sola linea
 std::string FileManager::escape(const std::string& s) {
     std::string out = "";
     for (size_t i = 0; i < s.size(); i++) {
@@ -112,7 +110,6 @@ bool FileManager::cargarCanciones(const std::string& nombreArchivo, Reproductor&
             delimDetected = true;
         }
 
-        // split manual (7 partes)
         std::string parts[7];
         int part = 0;
         std::string cur = "";
@@ -146,7 +143,6 @@ bool FileManager::guardarCanciones(const std::string& nombreArchivo, Reproductor
     std::ofstream out(nombreArchivo.c_str(), std::ios::trunc);
     if (!out.is_open()) return false;
 
-    // Guardamos con coma (estandar)
     int n = reproductor.getCantidadCancionesRegistradas();
     for (int i = 0; i < n; i++) {
         Cancion c = reproductor.getCancionRegistrada(i);
@@ -161,8 +157,6 @@ bool FileManager::guardarCanciones(const std::string& nombreArchivo, Reproductor
     return true;
 }
 
-// Serializacion de Cancion para status.cfg en una sola linea:
-// SONG=id|nombre|artista|album|anio|dur|ubicacion  (con escape en strings)
 static std::string serializeSong(const Cancion& c) {
     std::string s = "";
     s += std::to_string(c.getIdInterno()); s += "|";
@@ -176,8 +170,6 @@ static std::string serializeSong(const Cancion& c) {
 }
 
 static bool deserializeSong(const std::string& s, Cancion& out) {
-    // split por | respetando escapes ya aplicados (aqui asumimos que | escapado viene como \|)
-    // como escape usa \|, primero hacemos split simple por '|' y luego unescape.
     std::string parts[7];
     int part = 0;
     std::string cur = "";
@@ -278,7 +270,6 @@ bool FileManager::guardarStatus(const std::string& nombreArchivo, Reproductor& r
         out << "ACTUAL=" << serializeSong(c) << "\n";
     }
 
-    // Guardamos cada pendiente como una linea PENDING=...
     int n = reproductor.getCantidadCancionesEnListaActual();
     for (int i = 0; i < n; i++) {
         Cancion p = reproductor.getCancionEnListaActual(i);
